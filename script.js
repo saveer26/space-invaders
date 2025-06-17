@@ -26,6 +26,9 @@ function keydown(e){
     if(e.key == "ArrowLeft") {
       player.vx = player.speed * -1;
     }
+    if(e.key === " "){
+      activateLaser()
+    }
 }
   function keyUp(e){
     if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
@@ -34,6 +37,12 @@ function keydown(e){
 }
 function movePlayer(){
     player.x += player.vx;
+    if(player.x <= 0){
+      player.x = 0
+   }
+    if(player.x >= canvas.width - player.width){
+      player.x = canvas.width - player.width
+    }
 }
 background = new Image()
 background.src = "https://t4.ftcdn.net/jpg/08/23/16/77/360_F_823167736_3khXA7u6htYmqY0gKeRKmofnr6Q43Rkg.jpg"
@@ -41,12 +50,58 @@ function drawBackground() {
   ctx.drawImage(background,0,0,canvas.width,canvas.height);
 }
 
+let lasers = [];
+let lasersIndex = 0;
+for(let i = 0; i < 10; i++){
+  let laser = {
+    x:0,
+    y:0,
+    vy:0,
+    width:5,
+    height:20,
+    speed:5,
+    active:false,
+    color: "#ff2411"
+  }
+  lasers.push(laser);
+}
+function drawLasers(){
+  for(let i = 0;i < lasers.length; i++){
+  if(lasers[i].active){
+    ctx.fillStyle = lasers[i].color;
+  ctx.fillRect(lasers[i].x,lasers[i].y,lasers[i].width,lasers[i].height);
+  }
+}
+}
+function manage(){
+  for(let i = 0; i < lasers.length; i++){
+    if(lasers[i].active){
+      lasers[i].y -= lasers[i].speed;
+      if(lasers[i].y <= 0){
+        lasers[i].active = false;
+      }
+    }
+  }
+}
+function activateLaser(){
+  if(lasers[lasersIndex].active != true){
+    lasers[lasersIndex].active = true;
+    lasers[lasersIndex].x = player.x + player.width/2 - lasers[lasersIndex].width
+    lasers[lasersIndex].y = player.y;
+  }
+  lasersIndex++
+  if(lasersIndex >= lasers.length){
+    lasersIndex = 0
+  }
+}
 document.addEventListener("keyup",keyUp);
 document.addEventListener("keydown",keydown);
 function update(){
     drawBackground();
     drawPlayer();
     movePlayer();
+    drawLasers();
+    manage();
     requestAnimationFrame(update);
 }
 update()
