@@ -2,6 +2,13 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 canvas.width = 900;
 canvas.height = 700;
+// Collision Function
+function isColliding(rect1, rect2) {
+  return !(rect1.x > rect2.x + rect2.width ||
+             rect1.x + rect1.width < rect2.x ||
+             rect1.y > rect2.y + rect2.height ||
+             rect1.y + rect1.height < rect2.y);
+}
 const player = {
     x:0,
     y:canvas.height-100,
@@ -49,10 +56,12 @@ background.src = "https://t4.ftcdn.net/jpg/08/23/16/77/360_F_823167736_3khXA7u6h
 function drawBackground() {
   ctx.drawImage(background,0,0,canvas.width,canvas.height);
 }
-
+let enemies = [];
+let enemyIndex = 0;
 let lasers = [];
 let lasersIndex = 0;
 for(let i = 0; i < 10; i++){
+  let laserSound = new Audio("laser.mp3");
   let laser = {
     x:0,
     y:0,
@@ -61,19 +70,43 @@ for(let i = 0; i < 10; i++){
     height:20,
     speed:5,
     active:false,
+    audio:laserSound,
     color: "#ff2411"
   }
   lasers.push(laser);
+  let enemy = {
+    x:player.x,
+    y:0,
+    vy:0,
+    width:50,
+    height:50,
+    speed:1,
+    active:true,
+    sprite:null
+  } 
+  enemy.sprite = new Image();
+  enemy.sprite.src = "https://www.pngall.com/wp-content/uploads/13/Space-Invaders-PNG-Clipart.png";
+  enemies.push(enemy);
 }
 function drawLasers(){
   for(let i = 0;i < lasers.length; i++){
   if(lasers[i].active){
     ctx.fillStyle = lasers[i].color;
   ctx.fillRect(lasers[i].x,lasers[i].y,lasers[i].width,lasers[i].height);
+  }  
+}
+
+}
+ 
+function drawEnemy(){
+  for(let i = 0; i < enemies.length; i++){
+    if(enemies[i].active){
+      ctx.drawImage(enemies[i].sprite,enemies[i].x,enemies[i].y,enemies[i].width,enemies[i].height)
+    }
   }
 }
-}
-function manage(){
+
+function manageLasers(){
   for(let i = 0; i < lasers.length; i++){
     if(lasers[i].active){
       lasers[i].y -= lasers[i].speed;
@@ -83,8 +116,22 @@ function manage(){
     }
   }
 }
+function manageEnemies(){
+  for(let i = 0;i < enemies.length; i++){
+    if(enemies[i].active){
+      enemies[i].y += enemies[i].speed
+      for(let j = 0; j < lasers.length; j++){
+        if(isColliding(enemies[i],lasers[j])){
+          enemies[i].active = false;
+        }
+      }
+      
+    }
+  }
+}
 function activateLaser(){
   if(lasers[lasersIndex].active != true){
+    lasers[lasersIndex].audio.play();
     lasers[lasersIndex].active = true;
     lasers[lasersIndex].x = player.x + player.width/2 - lasers[lasersIndex].width
     lasers[lasersIndex].y = player.y;
@@ -101,7 +148,9 @@ function update(){
     drawPlayer();
     movePlayer();
     drawLasers();
-    manage();
+    drawEnemy();
+    manageLasers();
+    manageEnemies();
     requestAnimationFrame(update);
 }
 update()
