@@ -2,6 +2,7 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 canvas.width = 900;
 canvas.height = 700;
+score = document.getElementById("score")
 // Collision Function
 function isColliding(rect1, rect2) {
   return !(rect1.x > rect2.x + rect2.width ||
@@ -16,7 +17,8 @@ const player = {
     speed:7,
     width:100,
     height:100,
-    sprite:null
+    sprite:null,
+    score:0
 }
 player.x = canvas.width/2-player.width/2;
 player.sprite = new Image();
@@ -80,8 +82,8 @@ for(let i = 0; i < 10; i++){
     vy:0,
     width:50,
     height:50,
-    speed:1,
-    active:true,
+    speed:3,
+    active:false,
     sprite:null
   } 
   enemy.sprite = new Image();
@@ -121,24 +123,42 @@ function manageEnemies(){
     if(enemies[i].active){
       enemies[i].y += enemies[i].speed
       for(let j = 0; j < lasers.length; j++){
+        if(lasers[j].active){
         if(isColliding(enemies[i],lasers[j])){
           enemies[i].active = false;
+          lasers[j].active = false;
+          player.score += 1
         }
       }
-      
+      }
+      if (enemies[i].y >= canvas.height){
+        enemies[i].active = false;
+        enemies[i].y = 0;
+      }
     }
   }
 }
 function activateLaser(){
   if(lasers[lasersIndex].active != true){
     lasers[lasersIndex].audio.play();
-    lasers[lasersIndex].active = true;
     lasers[lasersIndex].x = player.x + player.width/2 - lasers[lasersIndex].width
     lasers[lasersIndex].y = player.y;
+    lasers[lasersIndex].active = true;
   }
-  lasersIndex++
+  lasersIndex++;
   if(lasersIndex >= lasers.length){
-    lasersIndex = 0
+    lasersIndex = 0;
+  }
+}
+function activateEnemy() {
+  if(enemies[enemyIndex].active != true){
+    enemies[enemyIndex].x = Math.floor(Math.random() * (canvas.width - enemies[enemyIndex].width));
+    enemies[enemyIndex].y = 0
+    enemies[enemyIndex].active = true;
+  }
+  enemyIndex++
+  if(enemyIndex >= enemies.length){
+    enemyIndex = 0
   }
 }
 document.addEventListener("keyup",keyUp);
@@ -151,6 +171,8 @@ function update(){
     drawEnemy();
     manageLasers();
     manageEnemies();
+    score.innerHTML = "score: " + player.score
     requestAnimationFrame(update);
 }
+ setInterval(activateEnemy, 1000)
 update()
