@@ -2,7 +2,12 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 canvas.width = 900;
 canvas.height = 700;
-score = document.getElementById("score")
+let score = document.getElementById("score")
+let lives = document.getElementById("health")
+// mdisplaying and making lives
+let heart = document.createElement("img")
+heart.src = "https://shop.bitgem3d.com/cdn/shop/products/textures-2d-pixel-heart-1.png?v=1598593890"
+lives.appendChild(heart)
 // Collision Function
 function isColliding(rect1, rect2) {
   return !(rect1.x > rect2.x + rect2.width ||
@@ -14,11 +19,12 @@ const player = {
     x:0,
     y:canvas.height-100,
     vx:0,
-    speed:7,
+    speed:15,
     width:100,
     height:100,
     sprite:null,
-    score:0
+    score:0,
+    lives:3,
 }
 player.x = canvas.width/2-player.width/2;
 player.sprite = new Image();
@@ -69,13 +75,14 @@ for(let i = 0; i < 10; i++){
     y:0,
     vy:0,
     width:5,
-    height:20,
+    height:10,
     speed:5,
     active:false,
     audio:laserSound,
     color: "#ff2411"
   }
   lasers.push(laser);
+  let hitSound = new Audio("hit.mp3");
   let enemy = {
     x:player.x,
     y:0,
@@ -84,7 +91,8 @@ for(let i = 0; i < 10; i++){
     height:50,
     speed:3,
     active:false,
-    sprite:null
+    sprite:null,
+    audio:hitSound
   } 
   enemy.sprite = new Image();
   enemy.sprite.src = "https://www.pngall.com/wp-content/uploads/13/Space-Invaders-PNG-Clipart.png";
@@ -119,25 +127,40 @@ function manageLasers(){
   }
 }
 function manageEnemies(){
+  let hit2Sound = new Audio("hit2.mp3");
   for(let i = 0;i < enemies.length; i++){
     if(enemies[i].active){
+      //
       enemies[i].y += enemies[i].speed
+      //
+      if(enemies[i].y >= canvas.height){
+        player.lives -= 1
+      hit2Sound.play()
+      enemies[i].active = false
+      }
+      //
+      if(isColliding(enemies[i],player)){
+        player.lives -= 1
+        hit2Sound.play()
+        if(enemies[i].y <= canvas.height){
+        enemies[i].active = false
+      }
+    }
+      //
       for(let j = 0; j < lasers.length; j++){
         if(lasers[j].active){
         if(isColliding(enemies[i],lasers[j])){
           enemies[i].active = false;
           lasers[j].active = false;
+          enemies[i].audio.play()
           player.score += 1
         }
-      }
-      }
-      if (enemies[i].y >= canvas.height){
-        enemies[i].active = false;
-        enemies[i].y = 0;
+      }  
       }
     }
   }
 }
+
 function activateLaser(){
   if(lasers[lasersIndex].active != true){
     lasers[lasersIndex].audio.play();
@@ -172,6 +195,7 @@ function update(){
     manageLasers();
     manageEnemies();
     score.innerHTML = "score: " + player.score
+    // lives.innerHTML = "lives: " + player.lives
     requestAnimationFrame(update);
 }
  setInterval(activateEnemy, 1000)

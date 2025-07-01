@@ -1,3 +1,6 @@
 #canvas {
     border: 1px black solid;
 }
+#health img{
+    width:50px;
+}
