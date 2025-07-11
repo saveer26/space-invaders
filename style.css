@@ -4,3 +4,12 @@
 #health img{
     width:50px;
 }
+
+@font-face{
+    font-family: "pixelFont";
+    src: url("pixel.ttf")
+}
+
+body{
+    font-family: "pixelFont";
+}

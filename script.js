@@ -1,13 +1,18 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-canvas.width = 900;
-canvas.height = 700;
+canvas.width = 700;
+canvas.height = 900;
 let score = document.getElementById("score")
 let lives = document.getElementById("health")
 // mdisplaying and making lives
+let hearts = []
+let removeHeartAtIndex = 0
+for(let i = 0;i < 3;i++){
 let heart = document.createElement("img")
 heart.src = "https://shop.bitgem3d.com/cdn/shop/products/textures-2d-pixel-heart-1.png?v=1598593890"
 lives.appendChild(heart)
+hearts.push(heart)
+}
 // Collision Function
 function isColliding(rect1, rect2) {
   return !(rect1.x > rect2.x + rect2.width ||
@@ -19,7 +24,7 @@ const player = {
     x:0,
     y:canvas.height-100,
     vx:0,
-    speed:15,
+    speed:5,
     width:100,
     height:100,
     sprite:null,
@@ -89,7 +94,7 @@ for(let i = 0; i < 10; i++){
     vy:0,
     width:50,
     height:50,
-    speed:3,
+    speed:1,
     active:false,
     sprite:null,
     audio:hitSound
@@ -137,6 +142,9 @@ function manageEnemies(){
         player.lives -= 1
       hit2Sound.play()
       enemies[i].active = false
+      lives.removeChild(hearts[removeHeartAtIndex])
+      removeHeartAtIndex++
+      // index out of bounds error
       }
       //
       if(isColliding(enemies[i],player)){
@@ -144,6 +152,9 @@ function manageEnemies(){
         hit2Sound.play()
         if(enemies[i].y <= canvas.height){
         enemies[i].active = false
+        lives.removeChild(hearts[removeHeartAtIndex])
+      removeHeartAtIndex++
+      // index out of bounds error
       }
     }
       //
@@ -195,8 +206,17 @@ function update(){
     manageLasers();
     manageEnemies();
     score.innerHTML = "score: " + player.score
+
     // lives.innerHTML = "lives: " + player.lives
     requestAnimationFrame(update);
 }
- setInterval(activateEnemy, 1000)
+function increaseSpeed(){
+  for(let i = 0;i < enemies.length; i++){
+  enemies[i].speed += 1
+}
+player.speed += 2
+}
+
+setInterval(activateEnemy, 1000)
+ setInterval(increaseSpeed, 10000)
 update()
