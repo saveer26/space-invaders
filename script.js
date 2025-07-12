@@ -13,6 +13,7 @@ heart.src = "https://shop.bitgem3d.com/cdn/shop/products/textures-2d-pixel-heart
 lives.appendChild(heart)
 hearts.push(heart)
 }
+let enemysprites = ["sprites/invader.png","sprites/invader2.png","sprites/invader3.png"]
 // Collision Function
 function isColliding(rect1, rect2) {
   return !(rect1.x > rect2.x + rect2.width ||
@@ -138,7 +139,7 @@ function manageEnemies(){
       //
       enemies[i].y += enemies[i].speed
       //
-      if(enemies[i].y >= canvas.height){
+      if(enemies[i].y >= canvas.height && player.lives > 0){
         player.lives -= 1
       hit2Sound.play()
       enemies[i].active = false
@@ -147,7 +148,7 @@ function manageEnemies(){
       // index out of bounds error
       }
       //
-      if(isColliding(enemies[i],player)){
+      if(isColliding(enemies[i],player) && player.lives > 0){
         player.lives -= 1
         hit2Sound.play()
         if(enemies[i].y <= canvas.height){
@@ -188,12 +189,19 @@ function activateEnemy() {
   if(enemies[enemyIndex].active != true){
     enemies[enemyIndex].x = Math.floor(Math.random() * (canvas.width - enemies[enemyIndex].width));
     enemies[enemyIndex].y = 0
+    enemies[enemyIndex].sprite.src = enemysprites[Math.floor(Math.random() * 3)] 
     enemies[enemyIndex].active = true;
   }
   enemyIndex++
   if(enemyIndex >= enemies.length){
     enemyIndex = 0
   }
+}
+
+function gameOver(){
+  ctx.fillStyle = "white"
+  ctx.font = "bold 50px pixelFont"
+  ctx.fillText("GAME_OVER", 50, 50)
 }
 document.addEventListener("keyup",keyUp);
 document.addEventListener("keydown",keydown);
@@ -206,7 +214,9 @@ function update(){
     manageLasers();
     manageEnemies();
     score.innerHTML = "score: " + player.score
-
+    if(player.lives <= 0){
+      gameOver()
+    }
     // lives.innerHTML = "lives: " + player.lives
     requestAnimationFrame(update);
 }

@@ -1,5 +1,6 @@
 #canvas {
-    border: 1px black solid;
+    border: 10px white solid;
+    border-radius: 15px;
 }
 #health img{
     width:50px;
@@ -14,4 +15,9 @@ body{
     font-family: "pixelFont";
     color: white;
     background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
 }
